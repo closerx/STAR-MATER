@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تمرُّس - مهمة فاتورة المبيعات</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --success: #10b981;
+      --error: #ef4444;
+      --light: #f3f4f6;
+    }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .task {
+      padding: 30px;
+    }
+    .invoice {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+    .entry {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .entry select, .entry input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      flex: 1;
+    }
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .feedback {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .success { background: #d1fae5; color: var(--success); }
+    .error { background: #fee2e2; color: var(--error); }
+    .hint { background: #fef3c7; color: #d97706; }
+    .next-task {
+      background: var(--success);
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>تمرُّس</h1>
+    <p>مهمة #1: إدخال فاتورة مبيعات</p>
+  </div>
+
+  <div class="task">
+    <div class="invoice">
+      <p><strong>الفاتورة:</strong></p>
+      <ul>
+        <li>العميل: شركة الأفق التجارية</li>
+        <li>المبلغ: 10,000 ريال</li>
+        <li>ضريبة القيمة المضافة: 15%</li>
+        <li>التاريخ: 2025-10-25</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <select id="debit-account">
+        <option value="">-- اختر الحساب المدين --</option>
+        <option value="العملاء">العملاء</option>
+        <option value="المبيعات">المبيعات</option>
+        <option value="ضريبة القيمة المضافة">ضريبة القيمة المضافة</option>
+      </select>
+      <input type="number" id="debit-amount" placeholder="المبلغ" />
+    </div>
+
+    <div class="entry">
+      <select id="credit-account">
+        <option value="">-- اختر الحساب الدائن --</option>
+        <option value="العملاء">العملاء</option>
+        <option value="المبيعات">المبيعات</option>
+        <option value="ضريبة القيمة المضافة">ضريبة القيمة المضافة</option>
+      </select>
+      <input type="number" id="credit-amount" placeholder="المبلغ" />
+    </div>
+
+    <button onclick="checkEntry()">تحقق من القيد</button>
+
+    <div id="feedback"></div>
+
+    <button class="next-task" id="nextBtn" onclick="nextTask()">المهمة التالية</button>
+  </div>
+</div>
+
+<script>
+  // الحل الصحيح
+  const correct = {
+    debit: { account: "العملاء", amount: 11500 },
+    credit: { account: "المبيعات", amount: 10000 },
+    vat: { account: "ضريبة القيمة المضافة", amount: 1500 }
+  };
+
+  let attempts = 0;
+
+  function checkEntry() {
+    const debitAcc = document.getElementById("debit-account").value;
+    const debitAmt = parseFloat(document.getElementById("debit-amount").value);
+    const creditAcc = document.getElementById("credit-account").value;
+    const creditAmt = parseFloat(document.getElementById("credit-amount").value);
+
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("nextBtn");
+
+    attempts++;
+
+    // التحقق من الإجابة
+    if (
+      debitAcc === correct.debit.account && debitAmt === correct.debit.amount &&
+      creditAcc === correct.credit.account && creditAmt === correct.credit.amount
+    ) {
+      feedback.className = "feedback success";
+      feedback.innerHTML = "ممتاز! القيد صحيح 100%";
+      nextBtn.style.display = "block";
+      document.querySelector("button").disabled = true;
+    } else {
+      feedback.className = "feedback error";
+      feedback.innerHTML = "خطأ. حاول مرة أخرى.";
+
+      // تلميح بعد المحاولة الثانية
+      if (attempts === 2) {
+        setTimeout(() => {
+          feedback.className = "feedback hint";
+          feedback.innerHTML = "تلميح: المبلغ المدين = المبيعات + الضريبة (15%)";
+        }, 1500);
+      }
+
+      // إعادة المهمة ببيانات جديدة بعد 3 محاولات
+      if (attempts >= 3) {
+        setTimeout(() => {
+          resetWithNewData();
+        }, 2000);
+      }
+    }
+  }
+
+  function resetWithNewData() {
+    const newAmount = Math.floor(Math.random() * 5000) + 5000;
+    const vat = newAmount * 0.15;
+    const total = newAmount + vat;
+
+    document.querySelector(".invoice ul").innerHTML = `
+      <li>العميل: شركة النور</li>
+      <li>المبلغ: ${newAmount} ريال</li>
+      <li>ضريبة القيمة المضافة: 15%</li>
+      <li>التاريخ: 2025-10-26</li>
+    `;
+
+    // تحديث الحل الصحيح
+    correct.debit.amount = total;
+    correct.credit.amount = newAmount;
+    correct.vat.amount = vat;
+
+    document.getElementById("feedback").innerHTML = "مهمة جديدة! حاول مرة أخرى.";
+    document.getElementById("feedback").className = "feedback";
+    document.querySelector("button").disabled = false;
+    document.getElementById("nextBtn").style.display = "none";
+    attempts = 0;
+
+    // تفريغ الحقول
+    document.getElementById("debit-account").value = "";
+    document.getElementById("debit-amount").value = "";
+    document.getElementById("credit-account").value = "";
+    document.getElementById("credit-amount").value = "";
+  }
+
+  function nextTask() {
+    alert("تم الانتقال إلى المهمة التالية: تسوية بنكية!");
+    // هنا يمكنك تحميل مهمة جديدة أو صفحة أخرى
+    // window.location.href = "task2.html";
+  }
+</script>
+
+</body>
+</html>
